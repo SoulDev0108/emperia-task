@@ -167,3 +167,19 @@ class ProductService:
         except Exception as e:
             logger.error(f"Failed to get products - Error: {str(e)}")
             raise
+    
+    
+    async def update_product(self, product_id: int, update_data: ProductUpdate) -> Optional[Dict[str, Any]]:
+        try:
+            update_dict = update_data.dict(exclude_unset=True)
+            
+            if update_data.images is not None:
+                update_dict['images'] = json.dumps(update_data.images)
+            
+            product = await self.repository.update(product_id, update_dict)
+            if product:
+                return product.to_dict()
+            return None
+        except Exception as e:
+            logger.error(f"Failed to update product - Product ID: {product_id}, Error: {str(e)}")
+            raise

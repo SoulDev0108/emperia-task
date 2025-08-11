@@ -60,3 +60,27 @@ class ProductListResponse(BaseModel):
     pages: int
     has_next: bool
     has_prev: bool
+
+class ProductUpdate(BaseModel):
+    """Schema for updating an existing product."""
+    
+    title: Optional[str] = Field(None, min_length=1, max_length=255)
+    description: Optional[str] = None
+    price: Optional[Decimal] = Field(None, ge=0, decimal_places=2)
+    discount_percentage: Optional[Decimal] = Field(None, ge=0, le=100, decimal_places=2)
+    category: Optional[str] = Field(None, min_length=1, max_length=100)
+    brand: Optional[str] = Field(None, max_length=100)
+    rating: Optional[Decimal] = Field(None, ge=0, le=5, decimal_places=2)
+    stock: Optional[int] = Field(None, ge=0)
+    thumbnail: Optional[str] = Field(None, max_length=500)
+    images: Optional[List[str]] = None
+    is_active: Optional[bool] = None
+    
+    @validator('images')
+    def validate_images(cls, v):
+        """Validate image URLs."""
+        if v is not None:
+            for url in v:
+                if not url.startswith(('http://', 'https://')):
+                    raise ValueError('Image URLs must be valid HTTP/HTTPS URLs')
+        return v

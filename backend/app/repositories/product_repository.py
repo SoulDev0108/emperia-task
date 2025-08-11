@@ -94,3 +94,24 @@ class ProductRepository:
         except Exception as e:
             logger.error(f"Failed to get products - Error: {str(e)}")
             raise
+
+    async def update(self, product_id: int, update_data: dict) -> Optional[Product]:
+        """Update an existing product."""
+        try:
+            product = await self.get_by_id(product_id)
+            if not product:
+                return None
+            
+            for field, value in update_data.items():
+                if hasattr(product, field):
+                    setattr(product, field, value)
+            
+            await self.session.commit()
+            await self.session.refresh(product)
+            
+            logger.info(f"Product updated - Product ID: {product_id}")
+            return product
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Failed to update product - Product ID: {product_id}, Error: {str(e)}")
+            raise
