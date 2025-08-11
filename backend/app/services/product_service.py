@@ -183,3 +183,11 @@ class ProductService:
         except Exception as e:
             logger.error(f"Failed to update product - Product ID: {product_id}, Error: {str(e)}")
             raise
+    
+    async def delete_product(self, product_id: int) -> bool:
+        """Delete a product."""
+        try:
+            return await self.repository.delete(product_id)
+        except Exception as e:
+            logger.error(f"Failed to delete product - Product ID: {product_id}, Error: {str(e)}")
+            raise

@@ -115,3 +115,20 @@ class ProductRepository:
             await self.session.rollback()
             logger.error(f"Failed to update product - Product ID: {product_id}, Error: {str(e)}")
             raise
+
+    async def delete(self, product_id: int) -> bool:
+        """Delete a product."""
+        try:
+            product = await self.get_by_id(product_id)
+            if not product:
+                return False
+            
+            await self.session.delete(product)
+            await self.session.commit()
+            
+            logger.info(f"Product deleted - Product ID: {product_id}")
+            return True
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Failed to delete product - Product ID: {product_id}, Error: {str(e)}")
+            raise
