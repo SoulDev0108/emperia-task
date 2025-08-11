@@ -26,14 +26,26 @@ class ProductBase(BaseModel):
     is_active: bool = Field(True, description="Product availability status")
 
 
-class ProductCreate(ProductBase):
-    """Schema for creating a new product."""
-    
+class ProductCreate(ProductBase):    
     @validator('images')
     def validate_images(cls, v):
-        """Validate image URLs."""
         if v is not None:
             for url in v:
                 if not url.startswith(('http://', 'https://')):
                     raise ValueError('Image URLs must be valid HTTP/HTTPS URLs')
         return v
+
+class ProductResponse(ProductBase):
+    """Schema for product response."""
+    
+    id: int
+    discounted_price: Optional[Decimal] = None
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+        json_encoders = {
+            Decimal: lambda v: float(v),
+            datetime: lambda v: v.isoformat()
+        }

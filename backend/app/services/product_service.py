@@ -121,3 +121,14 @@ class ProductService:
         except Exception as e:
             logger.error(f"Failed to create product - Error: {str(e)}")
             raise
+
+    async def get_product(self, product_id: int) -> Optional[Dict[str, Any]]:
+        """Get product by ID."""
+        try:
+            product = await self.repository.get_by_id(product_id)
+            if product:
+                return product.to_dict()
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get product - Product ID: {product_id}, Error: {str(e)}")
+            raise
