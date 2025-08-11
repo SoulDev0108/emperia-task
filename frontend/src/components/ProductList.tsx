@@ -15,14 +15,17 @@ import {
   AlertIcon,
   Badge,
   Heading,
+  Divider,
   SimpleGrid,
   useColorModeValue,
   Center,
 } from '@chakra-ui/react'
-import { Grid3X3, List } from 'lucide-react'
+import { Grid3X3, List, Plus } from 'lucide-react'
 import { productApi } from '../services/api'
 import { Product, ProductFilter, ProductSort, ProductPagination } from '../types/product'
 import ProductCard from '../components/ProductCard'
+import ProductFilters from '../components/ProductFilters'
+import Pagination from '../components/Pagination'
 
 export default function ProductList() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -64,6 +67,31 @@ export default function ProductList() {
     queryFn: () => productApi.getProducts(filters, sortParams, paginationParams),
     placeholderData: (previousData) => previousData,
   })
+
+  // Fetch categories
+  const { data: categories = [] } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => productApi.getCategories()
+  })
+
+  // Fetch brands
+  const { data: brands = [] } = useQuery({
+    queryKey: ['brands'],
+    queryFn: () => productApi.getBrands()
+  })
+
+  // Fetch price range
+  const { data: priceRange } = useQuery({
+    queryKey: ['priceRange'],
+    queryFn: productApi.getPriceRange
+  })
+
+  // Handle filter changes
+  const handleFiltersChange = (newFilters: ProductFilter) => {
+    setFilters(newFilters)
+    setCurrentPage(1) // Reset to first page when filters change
+  }
+
   // Handle sort changes
   const handleSortChange = (field: string) => {
     if (sortBy === field) {
@@ -73,6 +101,12 @@ export default function ProductList() {
       setSortOrder('asc')
     }
     setCurrentPage(1)
+  }
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   // Handle successful product operations
@@ -93,6 +127,8 @@ export default function ProductList() {
 
   const products = productsData?.products || []
   const totalPages = productsData?.pages || 0
+  const hasNext = productsData?.has_next || false
+  const hasPrev = productsData?.has_prev || false
 
   return (
     <Container maxW="container.xl" py={8}>
@@ -106,6 +142,15 @@ export default function ProductList() {
             Manage and browse your product catalog with advanced filtering and search
           </Text>
         </Box>
+
+        {/* Filters and Search */}
+        <ProductFilters
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          categories={categories}
+          brands={brands}
+          priceRange={priceRange ? { min: priceRange.min_price, max: priceRange.max_price } : undefined}
+        />
 
         {/* View Controls and Sorting */}
         <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
@@ -222,6 +267,20 @@ export default function ProductList() {
                 ))}
               </VStack>
             )}
+          </Box>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <Box>
+            <Divider mb={6} />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              hasNext={hasNext}
+              hasPrev={hasPrev}
+            />
           </Box>
         )}
       </VStack>
