@@ -26,6 +26,7 @@ import { Product, ProductFilter, ProductSort, ProductPagination } from '../types
 import ProductCard from '../components/ProductCard'
 import ProductFilters from '../components/ProductFilters'
 import Pagination from '../components/Pagination'
+import ProductForm from './ProductForm'
 
 export default function ProductList() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -156,6 +157,20 @@ export default function ProductList() {
         <Flex justify="space-between" align="center" wrap="wrap" gap={4}>
           {/* Left side - Create Product and View Mode */}
           <HStack spacing={4}>
+            <ProductForm
+              mode="create"
+              onSuccess={handleProductSuccess}
+              trigger={
+                <Button
+                  leftIcon={<Plus size={16} />}
+                  colorScheme="primary"
+                  size="md"
+                >
+                  Add Product
+                </Button>
+              }
+            />
+
             {/* View Mode Toggle */}
             <HStack spacing={2}>
               <IconButton

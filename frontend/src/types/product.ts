@@ -59,7 +59,7 @@ export interface ProductCreate {
   rating?: number
   stock: number
   thumbnail?: string
-  images?: string[]
+  images?: string
 }
 
 export interface ProductUpdate {
@@ -72,6 +72,6 @@ export interface ProductUpdate {
   rating?: number
   stock?: number
   thumbnail?: string
-  images?: string[]
+  images?: string
   is_active?: boolean
 } 
