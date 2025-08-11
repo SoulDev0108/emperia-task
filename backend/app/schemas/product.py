@@ -1,0 +1,39 @@
+from datetime import datetime
+from decimal import Decimal
+from typing import List, Optional, Union, Any
+from pydantic import BaseModel, Field, validator
+
+
+class ProductBase(BaseModel):
+    """Base product schema with common fields."""
+    
+    title: str = Field(..., min_length=1, max_length=255, description="Product title")
+    description: Optional[str] = Field(None, description="Product description")
+    price: Decimal = Field(..., ge=0, decimal_places=2, description="Product price")
+    discount_percentage: Optional[Decimal] = Field(
+        None, ge=0, le=100, decimal_places=2, description="Discount percentage"
+    )
+    category: str = Field(..., min_length=1, max_length=100, description="Product category")
+    brand: Optional[str] = Field(None, max_length=100, description="Product brand")
+    rating: Optional[Decimal] = Field(
+        None, ge=0, le=5, decimal_places=2, description="Product rating (0-5)"
+    )
+    stock: int = Field(..., ge=0, description="Available stock quantity")
+    thumbnail: Optional[str] = Field(None, max_length=500, description="Thumbnail image URL")
+    images: Optional[List[str]] = Field(None, description="List of product image URLs")
+    external_id: Optional[int] = Field(None, description="External API product ID")
+    external_source: Optional[str] = Field(None, max_length=50, description="External API source")
+    is_active: bool = Field(True, description="Product availability status")
+
+
+class ProductCreate(ProductBase):
+    """Schema for creating a new product."""
+    
+    @validator('images')
+    def validate_images(cls, v):
+        """Validate image URLs."""
+        if v is not None:
+            for url in v:
+                if not url.startswith(('http://', 'https://')):
+                    raise ValueError('Image URLs must be valid HTTP/HTTPS URLs')
+        return v

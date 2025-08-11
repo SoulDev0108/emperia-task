@@ -18,7 +18,7 @@ class ProductService:
     def __init__(self, session: AsyncSession):
         self.repository = ProductRepository(session)
         self.session = session
- 
+
     async def sync_from_external_api(self, source: str = "dummy") -> Dict[str, Any]:
         """Sync products from external API."""
         try:
@@ -107,3 +107,17 @@ class ProductService:
             logger.error(f"Failed to sync from DummyJSON API - Error: {str(e)}")
             raise
     
+    async def create_product(self, product_data: ProductCreate) -> Dict[str, Any]:
+        """Create a new product."""
+        try:
+            product_dict = product_data.dict()
+            
+            # Handle images list
+            if product_data.images:
+                product_dict['images'] = json.dumps(product_data.images)
+            
+            product = await self.repository.create(product_dict)
+            return product.to_dict()
+        except Exception as e:
+            logger.error(f"Failed to create product - Error: {str(e)}")
+            raise
