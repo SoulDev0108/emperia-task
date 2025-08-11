@@ -5,6 +5,15 @@ from decimal import Decimal
 import httpx
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from ..repositories.product_repository import ProductRepository
+from ..schemas.product import (
+    ProductCreate, 
+    ProductUpdate, 
+    ProductFilter, 
+    ProductSort, 
+    ProductPagination,
+    ProductListResponse
+)
 from ..core.config import get_settings
 from ..core.logging import get_logger, log_external_api_call
 
@@ -191,3 +200,32 @@ class ProductService:
         except Exception as e:
             logger.error(f"Failed to delete product - Product ID: {product_id}, Error: {str(e)}")
             raise
+    
+    async def get_categories(self) -> List[str]:
+        """Get all unique product categories."""
+        try:
+            return await self.repository.get_categories()
+        except Exception as e:
+            logger.error(f"Failed to get categories - Error: {str(e)}")
+            raise
+    
+    async def get_brands(self) -> List[str]:
+        """Get all unique product brands."""
+        try:
+            return await self.repository.get_brands()
+        except Exception as e:
+            logger.error(f"Failed to get brands - Error: {str(e)}")
+            raise
+    
+    async def get_price_range(self) -> Dict[str, float]:
+        """Get min and max product prices."""
+        try:
+            min_price, max_price = await self.repository.get_price_range()
+            return {
+                "min_price": float(min_price),
+                "max_price": float(max_price)
+            }
+        except Exception as e:
+            logger.error(f"Failed to get price range - Error: {str(e)}")
+            raise
+    

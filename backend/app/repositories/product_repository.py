@@ -132,3 +132,101 @@ class ProductRepository:
             await self.session.rollback()
             logger.error(f"Failed to delete product - Product ID: {product_id}, Error: {str(e)}")
             raise
+
+    async def get_categories(self) -> List[str]:
+        """Get all unique product categories."""
+        try:
+            result = await self.session.execute(
+                select(Product.category).distinct().where(Product.is_active == True)
+            )
+            return [row[0] for row in result.fetchall()]
+        except Exception as e:
+            logger.error(f"Failed to get categories - Error: {str(e)}")
+            raise
+    
+    async def get_brands(self) -> List[str]:
+        """Get all unique product brands."""
+        try:
+            result = await self.session.execute(
+                select(Product.brand).distinct().where(
+                    and_(Product.is_active == True, Product.brand.isnot(None))
+                )
+            )
+            return [row[0] for row in result.fetchall()]
+        except Exception as e:
+            logger.error(f"Failed to get brands - Error: {str(e)}")
+            raise
+    
+    async def get_price_range(self) -> Tuple[Decimal, Decimal]:
+        """Get minimum and maximum product prices."""
+        try:
+            result = await self.session.execute(
+                select(
+                    func.min(Product.price),
+                    func.max(Product.price)
+                ).where(Product.is_active == True)
+            )
+            min_price, max_price = result.fetchone()
+            return min_price or Decimal('0'), max_price or Decimal('0')
+        except Exception as e:
+            logger.error(f"Failed to get price range - Error: {str(e)}")
+            raise
+    
+    def _apply_filters(self, query, count_query, filters: ProductFilter):
+        """Apply filters to query."""
+        conditions = []
+        
+        if filters.category:
+            conditions.append(Product.category.ilike(f"%{filters.category}%"))
+        
+        if filters.brand:
+            conditions.append(Product.brand.ilike(f"%{filters.brand}%"))
+        
+        if filters.min_price is not None:
+            conditions.append(Product.price >= filters.min_price)
+        
+        if filters.max_price is not None:
+            conditions.append(Product.price <= filters.max_price)
+        
+        if filters.min_rating is not None:
+            conditions.append(Product.rating >= filters.min_rating)
+        
+        if filters.max_rating is not None:
+            conditions.append(Product.rating <= filters.max_rating)
+        
+        if filters.in_stock is not None:
+            if filters.in_stock:
+                conditions.append(Product.stock > 0)
+            else:
+                conditions.append(Product.stock == 0)
+        
+        if filters.search:
+            search_term = f"%{filters.search}%"
+            conditions.append(
+                or_(
+                    Product.title.ilike(search_term),
+                    Product.description.ilike(search_term),
+                    Product.category.ilike(search_term),
+                    Product.brand.ilike(search_term)
+                )
+            )
+        
+        conditions.append(Product.is_active == True)
+        
+        if conditions:
+            query = query.where(and_(*conditions))
+            count_query = count_query.where(and_(*conditions))
+        
+        return query, count_query
+
+    def _apply_sorting(self, query, sort: ProductSort):
+        """Apply sorting to query."""
+        sort_field = getattr(Product, sort.sort_by)
+        if sort.sort_order == "desc":
+            return query.order_by(desc(sort_field))
+        return query.order_by(asc(sort_field))
+    
+    def _apply_pagination(self, query, pagination: ProductPagination):
+        """Apply pagination to query."""
+        offset = (pagination.page - 1) * pagination.size
+        return query.offset(offset).limit(pagination.size) 
