@@ -49,3 +49,14 @@ class ProductResponse(ProductBase):
             Decimal: lambda v: float(v),
             datetime: lambda v: v.isoformat()
         }
+
+class ProductListResponse(BaseModel):
+    """Schema for paginated product list response."""
+    
+    products: List[ProductResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+    has_next: bool
+    has_prev: bool

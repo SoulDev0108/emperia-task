@@ -132,3 +132,38 @@ class ProductService:
         except Exception as e:
             logger.error(f"Failed to get product - Product ID: {product_id}, Error: {str(e)}")
             raise
+    
+    async def get_products(
+        self,
+        filters: Optional[ProductFilter] = None,
+        sort: Optional[ProductSort] = None,
+        pagination: Optional[ProductPagination] = None
+    ) -> ProductListResponse:
+        """Get products with filtering, sorting, and pagination."""
+        try:
+            if not pagination:
+                pagination = ProductPagination()
+            
+            if not sort:
+                sort = ProductSort()
+            
+            products, total = await self.repository.get_all(filters, sort, pagination)
+            
+            pages = (total + pagination.size - 1) // pagination.size
+            has_next = pagination.page < pages
+            has_prev = pagination.page > 1
+            
+            product_dicts = [product.to_dict() for product in products]
+            
+            return ProductListResponse(
+                products=product_dicts,
+                total=total,
+                page=pagination.page,
+                size=pagination.size,
+                pages=pages,
+                has_next=has_next,
+                has_prev=has_prev
+            )
+        except Exception as e:
+            logger.error(f"Failed to get products - Error: {str(e)}")
+            raise
