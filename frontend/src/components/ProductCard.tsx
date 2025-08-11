@@ -16,8 +16,10 @@ import {
   MenuItem,
   MenuDivider,
 } from '@chakra-ui/react'
-import { MoreVertical, Eye, Star } from 'lucide-react'
+import { MoreVertical, Edit, Trash2, Eye, Star } from 'lucide-react'
 import { Product } from '../types/product'
+import ProductForm from './ProductForm'
+import DeleteProduct from './DeleteProduct'
 
 interface ProductCardProps {
   product: Product
@@ -25,12 +27,18 @@ interface ProductCardProps {
   onRefresh?: () => void
 }
 
-export default function ProductCard({ product, viewMode }: ProductCardProps) {
+export default function ProductCard({ product, viewMode, onRefresh }: ProductCardProps) {
   const bgColor = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.700')
   const textColor = useColorModeValue('gray.900', 'white')
   const mutedTextColor = useColorModeValue('gray.600', 'gray.400')
   const primaryColor = useColorModeValue('primary.500', 'primary.400')
+
+  const handleSuccess = () => {
+    if (onRefresh) {
+      onRefresh()
+    }
+  }
 
   if (viewMode === 'list') {
     return (
@@ -137,6 +145,41 @@ export default function ProductCard({ product, viewMode }: ProductCardProps) {
                   _hover={{ color: primaryColor }}
                 />
               </Tooltip>
+
+              <ProductForm
+                mode="edit"
+                product={product}
+                onSuccess={handleSuccess}
+                trigger={
+                  <Tooltip label="Edit product" placement="top">
+                    <IconButton
+                      aria-label="Edit product"
+                      icon={<Edit size={16} />}
+                      variant="ghost"
+                      size="sm"
+                      color={mutedTextColor}
+                      _hover={{ color: primaryColor }}
+                    />
+                  </Tooltip>
+                }
+              />
+
+              <DeleteProduct
+                product={product}
+                onSuccess={handleSuccess}
+                trigger={
+                  <Tooltip label="Delete product" placement="top">
+                    <IconButton
+                      aria-label="Delete product"
+                      icon={<Trash2 size={16} />}
+                      variant="ghost"
+                      size="sm"
+                      color="red.500"
+                      _hover={{ bg: 'red.50', _dark: { bg: 'red.900' } }}
+                    />
+                  </Tooltip>
+                }
+              />
             </HStack>
           </VStack>
         </Flex>
@@ -188,6 +231,25 @@ export default function ProductCard({ product, viewMode }: ProductCardProps) {
                 View Details
               </MenuItem>
               <MenuDivider />
+              <ProductForm
+                mode="edit"
+                product={product}
+                onSuccess={handleSuccess}
+                trigger={
+                  <MenuItem icon={<Edit size={16} />}>
+                    Edit Product
+                  </MenuItem>
+                }
+              />
+              <DeleteProduct
+                product={product}
+                onSuccess={handleSuccess}
+                trigger={
+                  <MenuItem icon={<Trash2 size={16} />} color="red.500">
+                    Delete Product
+                  </MenuItem>
+                }
+              />
             </MenuList>
           </Menu>
         </Box>

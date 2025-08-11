@@ -76,11 +76,17 @@ class ProductApi {
   }
 
   async getCategories(): Promise<string[]> {
-    return this.request<string[]>('/products/categories/list')
+    console.log('Fetching categories from:', `${API_BASE_URL}/products/categories/list`)
+    const result = await this.request<string[]>('/products/categories/list')
+    console.log('Categories result:', result)
+    return result
   }
 
   async getBrands(): Promise<string[]> {
-    return this.request<string[]>('/products/brands/list')
+    console.log('Fetching brands from:', `${API_BASE_URL}/products/brands/list`)
+    const result = await this.request<string[]>('/products/brands/list')
+    console.log('Brands result:', result)
+    return result
   }
 
   async getPriceRange(): Promise<{ min_price: number; max_price: number }> {

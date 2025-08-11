@@ -19,8 +19,10 @@ import {
   useToast,
   Grid,
 } from '@chakra-ui/react'
-import { ArrowLeft, Star, Heart, ShoppingCart, Share2 } from 'lucide-react'
+import { ArrowLeft, Edit, Trash2, Star, Heart, ShoppingCart, Share2 } from 'lucide-react'
 import { productApi } from '../services/api'
+import ProductForm from './ProductForm'
+import DeleteProduct from './DeleteProduct'
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>()
@@ -50,6 +52,41 @@ export default function ProductDetail() {
     enabled: !!productId,
     staleTime: 5 * 60 * 1000, // 5 minutes
   })
+
+  const handleProductSuccess = async () => {
+    setIsRefreshing(true)
+    try {
+      await refetchProduct()
+      toast({
+        title: 'Product updated successfully',
+        description: 'The product has been refreshed.',
+        status: 'success',
+        duration: 3000,
+        isClosable: true,
+      })
+    } catch (error) {
+      toast({
+        title: 'Failed to refresh product',
+        description: 'Please refresh the page manually.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    } finally {
+      setIsRefreshing(false)
+    }
+  }
+
+  const handleDeleteSuccess = () => {
+    toast({
+      title: 'Product deleted successfully',
+      description: 'Redirecting to product list...',
+      status: 'success',
+      duration: 3000,
+      isClosable: true,
+    })
+    setTimeout(() => navigate('/'), 2000)
+  }
 
   const handleLike = () => setIsLiked(!isLiked)
   const handleAddToCart = () => setIsInCart(!isInCart)
@@ -114,6 +151,39 @@ export default function ProductDetail() {
             >
               Back to Products
             </Button>
+
+            <HStack spacing={3}>
+              <ProductForm
+                mode="edit"
+                product={product}
+                onSuccess={handleProductSuccess}
+                trigger={
+                  <Button
+                    leftIcon={<Edit size={16} />}
+                    colorScheme="primary"
+                    variant="outline"
+                    size="md"
+                  >
+                    Edit Product
+                  </Button>
+                }
+              />
+
+              <DeleteProduct
+                product={product}
+                onSuccess={handleDeleteSuccess}
+                trigger={
+                  <Button
+                    leftIcon={<Trash2 size={16} />}
+                    colorScheme="red"
+                    variant="outline"
+                    size="md"
+                  >
+                    Delete Product
+                  </Button>
+                }
+              />
+            </HStack>
           </HStack>
         </Container>
       </Box>

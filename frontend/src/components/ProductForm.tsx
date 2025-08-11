@@ -29,7 +29,7 @@ import {
   Badge,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { Plus, Edit, Save, X, Star, ArrowUp } from 'lucide-react'
+import { Plus, Edit, Save, Star, ArrowUp } from 'lucide-react'
 import { Product, ProductCreate, ProductUpdate } from '../types/product'
 import { productApi } from '../services/api'
 

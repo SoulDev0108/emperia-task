@@ -3,6 +3,8 @@ import { Routes, Route } from 'react-router-dom'
 import { Box, Spinner, Center } from '@chakra-ui/react'
 import { ThemeProvider } from './contexts/ThemeContext'
 import Header from './components/Header'
+import ProductList from './components/ProductList'
+import ProductDetail from './components/ProductDetail'
 
 export default function App() {
   return (
@@ -17,6 +19,8 @@ export default function App() {
           }
         >
           <Routes>
+            <Route path="/" element={<ProductList />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
           </Routes>
         </Suspense>
       </Box>
